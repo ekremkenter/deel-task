@@ -15,6 +15,9 @@ router.get('/unpaid', async (req, res) => {
   const { id: profileId } = req.profile;
 
   const jobs = await Job.findAll({
+    where: {
+      paid: null,
+    },
     include: [
       {
         model: Contract,
@@ -35,13 +38,14 @@ router.get('/unpaid', async (req, res) => {
  * The amount should be moved from the client's balance to the contractor balance.
  * @returns payment status message
  */
-router.post('/:job_id/pay', async (req, res) => {
+router.post('/:jobId/pay', async (req, res) => {
   const { Job } = req.app.get('models');
 
-  const { job_id } = req.params;
+  const { jobId } = req.params;
+  console.log({ jobId });
 
   const job = await Job.findOne({
-    where: { id: job_id },
+    where: { id: jobId },
     include: { all: true, nested: true },
   });
   if (!job) return res.status(404).end();
@@ -62,6 +66,10 @@ router.post('/:job_id/pay', async (req, res) => {
   try {
     await contractor.increment({ balance: jobPrice });
     await client.decrement({ balance: jobPrice });
+    await job.update({
+      paid: true,
+      paymentDate: new Date(),
+    });
     await transaction.commit();
     return res.json({ message: 'Payment successful' }).end();
   } catch (error) {

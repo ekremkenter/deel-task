@@ -14,7 +14,7 @@ app.set('sequelize', sequelize);
 app.set('models', sequelize.models);
 
 app.use('/contracts', contractsRoute);
-app.use('/balance', balanceRoute);
+app.use('/balances', balanceRoute);
 app.use('/jobs', jobsRoute);
 app.use('/admin', adminRoute);
 
