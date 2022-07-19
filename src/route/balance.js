@@ -14,9 +14,17 @@ router.use(getProfile);
 router.post('/deposit/:userId', async (req, res) => {
   const { Profile, Job, Contract } = req.app.get('models');
 
-  const { id: profileId } = req.profile;
+  const { id: profileId, balance } = req.profile;
   const { userId } = req.params;
   const { amount } = req.body;
+
+  if (!amount) {
+    return res.status(406).json({ message: 'Provide amount to be deposited' });
+  }
+
+  if (amount > balance) {
+    return res.status(406).json({ message: 'You have insufficient balance' });
+  }
 
   const client = await Profile.findOne({
     where: { id: userId, type: 'client' },
