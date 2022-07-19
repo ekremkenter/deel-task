@@ -124,6 +124,23 @@ describe('API Test', () => {
         expect(res.body).toEqual({});
       });
 
+      it('should warn when amount is not provided', async () => {
+        const res = await request(app)
+          .post('/balances/deposit/2')
+          .set('profile_id', 1);
+        expect(res.statusCode).toEqual(406);
+        expect(res.body).toEqual({ message: 'Provide amount to be deposited' });
+      });
+
+      it('should warn when amount is bigger than profile balance', async () => {
+        const res = await request(app)
+          .post('/balances/deposit/2')
+          .send({ amount: 2000 })
+          .set('profile_id', 1);
+        expect(res.statusCode).toEqual(406);
+        expect(res.body).toEqual({ message: 'You have insufficient balance' });
+      });
+
       it('should transfer funds to other user', async () => {
         const res = await request(app)
           .post('/balances/deposit/2')
